@@ -38,13 +38,13 @@ async function buy(productId, button){
   const status=document.getElementById('status');
   button.disabled=true; status.textContent='Creating test order…';
   try{
-    const r=await fetch('/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId})});
+    const r=await fetch('https://deepakfinance.onrender.com/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId})});
     const data=await r.json(); if(!r.ok) throw new Error(data.error||'Order creation failed');
     const checkout=new Razorpay({
       key:data.keyId,amount:data.amount,currency:data.currency,name:'deepakfinance',
       description:data.productName,order_id:data.orderId,
       handler:async function(response){
-        const v=await fetch('/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(response)});
+        const v=await fetch('https://deepakfinance.onrender.com/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(response)});
         const result=await v.json();
         status.textContent=result.verified?'Test payment verified. No real money was charged.':'Payment verification failed.';
       },
