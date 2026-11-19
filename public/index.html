@@ -78,6 +78,7 @@ button:disabled { opacity: .5; cursor: wait; }
 </style>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -85,7 +86,15 @@ button:disabled { opacity: .5; cursor: wait; }
   <div class="brand">deepak<span>finance</span></div>
   <div class="tag">Digital learning library</div>
 </header>
-
+<section style="max-width:500px;margin:30px auto;padding:24px;background:#151515;border:1px solid #d7b56d;border-radius:15px;">
+  <h2 style="color:#d7b56d;">Customer Login</h2>
+  <input id="auth-email" type="email" placeholder="Email address" style="width:100%;padding:12px;margin:8px 0;">
+  <input id="auth-password" type="password" placeholder="Password" style="width:100%;padding:12px;margin:8px 0;">
+  <button onclick="signUp()" style="width:100%;margin:6px 0;">Create Account</button>
+  <button onclick="signIn()" style="width:100%;margin:6px 0;">Login</button>
+  <button onclick="signOut()" style="width:100%;margin:6px 0;">Logout</button>
+  <p id="auth-status" style="color:#d7b56d;"></p>
+</section>
 <main>
   <div class="tag">Learn at your own pace</div>
   <h1>Build your market knowledge.<br><span>One guide at a time.</span></h1>
@@ -295,6 +304,67 @@ async function checkout() {
 }
 
 renderCart();
+  
+const SUPABASE_URL = "https://fdehuzvdkmepdtzwebrl.supabase.co/rest/v1/";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_a_qF1zQ4_rt_UPX2_Tt4sw_cUx64AAl";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+async function signUp() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  const status = document.getElementById("auth-status");
+
+  if (!email || !password) {
+    status.textContent = "Enter your email and password.";
+    return;
+  }
+
+  status.textContent = "Creating your account...";
+
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  status.textContent = error
+    ? error.message
+    : "Account created! Check your email if confirmation is required.";
+}
+
+async function signIn() {
+  const email = document.getElementById("auth-email").value.trim();
+  const password = document.getElementById("auth-password").value;
+  const status = document.getElementById("auth-status");
+
+  if (!email || !password) {
+    status.textContent = "Enter your email and password.";
+    return;
+  }
+
+  status.textContent = "Logging in...";
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  status.textContent = error
+    ? error.message
+    : "Welcome! You are logged in as " + data.user.email;
+}
+
+async function signOut() {
+  const { error } = await supabaseClient.auth.signOut();
+
+  document.getElementById("auth-status").textContent =
+    error ? error.message : "You have logged out.";
+}
+
 </script>
 </body>
 </html>
