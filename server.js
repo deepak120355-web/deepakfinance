@@ -11,9 +11,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
+  if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
 
@@ -36,10 +34,7 @@ const catalogue = {
 };
 
 function getRazorpay() {
-  if (
-    !process.env.RAZORPAY_KEY_ID ||
-    !process.env.RAZORPAY_KEY_SECRET
-  ) {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw new Error("Razorpay keys are not configured.");
   }
 
@@ -51,39 +46,33 @@ function getRazorpay() {
 
 app.post("/api/create-order", async (req, res) => {
   try {
-    // Supports both the old single-product format
-    // and the new multiple-product cart format.
-    let productIds = req.body.productIds;
+    let productIds = req.body && req.body.productIds;
 
-    if (!productIds && req.body.productId) {
+    if (!productIds && req.body && req.body.productId) {
       productIds = [req.body.productId];
     }
 
     if (
       !Array.isArray(productIds) ||
-      productIds.length === 0 ||
+      productIds.length < 1 ||
       productIds.length > 3 ||
+      productIds.some(id => typeof id !== "string") ||
       new Set(productIds).size !== productIds.length
     ) {
-      return res.status(400).json({
-        error: "Invalid cart."
-      });
+      return res.status(400).json({ error: "Invalid cart." });
     }
 
     const items = productIds.map(id => catalogue[id]);
 
     if (items.some(item => !item)) {
-      return res.status(400).json({
-        error: "Unknown product in cart."
-      });
+      return res.status(400).json({ error: "Unknown product in cart." });
     }
 
     const totalAmount = items.reduce(
-      (total, item) => total + item.pricePaise,
-      0
+      (total, item) => total + item.pricePaise, 0
     );
 
-    const productNames = items.map(item => item.name);
+    const productName = items.map(item => item.name).join(", ");
 
     const order = await getRazorpay().orders.create({
       amount: totalAmount,
@@ -91,53 +80,75 @@ app.post("/api/create-order", async (req, res) => {
       receipt: "df_" + Date.now()
     });
 
-    res.json({
+    return res.json({
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
       keyId: process.env.RAZORPAY_KEY_ID,
-      productName: productNames.join(", ")
+      productName
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: "Could not create test order. Check server configuration."
+    console.error("Create order error:", error.message);
+    return res.status(500).json({
+      error: "Could not create test order. Check Razorpay settings in Render."
     });
   }
 });
 
 app.post("/api/verify-payment", (req, res) => {
-  const {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature
-  } = req.body;
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    } = req.body || {};
 
-  if (
-    !razorpay_order_id ||
-    !razorpay_payment_id ||
-    !razorpay_signature
-  ) {
-    return res.status(400).json({
+    if (
+      typeof razorpay_order_id !== "string" ||
+      typeof razorpay_payment_id !== "string" ||
+      typeof razorpay_signature !== "string" ||
+      !/^[a-f0-9]{64}$/i.test(razorpay_signature)
+    ) {
+      return res.status(400).json({
+        verified: false,
+        error: "Missing or invalid payment details."
+      });
+    }
+
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({
+        verified: false,
+        error: "Payment verification is not configured."
+      });
+    }
+
+    const expected = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(razorpay_signature, "hex");
+
+    const verified =
+      a.length === b.length &&
+      crypto.timingSafeEqual(a, b);
+
+    return res.status(verified ? 200 : 400).json({
+      verified,
+      ...(verified ? {} : {
+        error: "Payment signature verification failed."
+      })
+    });
+
+  } catch (error) {
+    console.error("Verify payment error:", error.message);
+    return res.status(500).json({
       verified: false,
-      error: "Missing payment details."
+      error: "Could not verify payment."
     });
   }
-
-  const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
-    .update(razorpay_order_id + "|" + razorpay_payment_id)
-    .digest("hex");
-
-  const a = Buffer.from(expected);
-  const b = Buffer.from(razorpay_signature);
-
-  const verified =
-    a.length === b.length &&
-    crypto.timingSafeEqual(a, b);
-
-  res.status(verified ? 200 : 400).json({ verified });
 });
 
 const port = process.env.PORT || 3000;
