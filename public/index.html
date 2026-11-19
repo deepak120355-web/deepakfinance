@@ -1,58 +1,300 @@
+
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>deepakfinance | Digital Learning</title>
+
 <style>
-:root{color-scheme:dark;--gold:#d7b56d;--bg:#090909;--panel:#151515;--muted:#aaa}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f7f3ea;font:16px/1.5 Arial,sans-serif}
-header{padding:26px max(6vw,22px);border-bottom:1px solid #29251d;display:flex;justify-content:space-between;align-items:center}
-.brand{font-size:24px;font-weight:700;letter-spacing:.4px}.brand span{color:var(--gold)}
-main{max-width:1050px;margin:65px auto;padding:0 22px}h1{font-size:clamp(34px,6vw,58px);line-height:1.08;margin:0 0 18px}h1 span{color:var(--gold)}
-.lead{color:var(--muted);max-width:650px;margin-bottom:38px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-article{background:var(--panel);border:1px solid #302a20;border-radius:15px;padding:24px}
-.tag{color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:1.5px}
-h2{font-size:21px;margin:12px 0}.price{font-size:25px;color:var(--gold);font-weight:700;margin:18px 0}
-button{background:var(--gold);color:#17130c;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer;width:100%}
-button:disabled{opacity:.5;cursor:wait}.note{color:var(--muted);font-size:13px;margin-top:26px}
-#status{margin-top:20px;color:var(--gold)}
+:root {
+  color-scheme: dark;
+  --gold: #d7b56d;
+  --bg: #090909;
+  --panel: #151515;
+  --muted: #aaa;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #f7f3ea;
+  font: 16px/1.5 Arial, sans-serif;
+}
+header {
+  padding: 26px max(6vw,22px);
+  border-bottom: 1px solid #29251d;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand { font-size: 24px; font-weight: 700; }
+.brand span, h1 span { color: var(--gold); }
+main { max-width: 1050px; margin: 55px auto; padding: 0 22px; }
+h1 { font-size: clamp(34px,6vw,58px); line-height: 1.08; }
+.lead { color: var(--muted); max-width: 650px; margin-bottom: 38px; }
+.tag { color: var(--gold); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+  gap: 18px;
+}
+article, .cart {
+  background: var(--panel);
+  border: 1px solid #302a20;
+  border-radius: 15px;
+  padding: 24px;
+}
+h2 { font-size: 21px; margin: 12px 0; }
+.price { font-size: 25px; color: var(--gold); font-weight: 700; margin: 18px 0; }
+button {
+  background: var(--gold);
+  color: #17130c;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:disabled { opacity: .5; cursor: wait; }
+.add-button, .checkout-button { width: 100%; }
+.cart { margin-top: 35px; }
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #302a20;
+  padding: 12px 0;
+}
+.remove-button {
+  background: #393027;
+  color: white;
+  padding: 8px 12px;
+}
+.total { color: var(--gold); font-size: 23px; font-weight: bold; margin: 20px 0; }
+#status { margin-top: 20px; color: var(--gold); }
+.note { color: var(--muted); font-size: 13px; margin-top: 26px; }
 </style>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
+
 <body>
-<header><div class="brand">deepak<span>finance</span></div><div class="tag">Digital learning library</div></header>
+<header>
+  <div class="brand">deepak<span>finance</span></div>
+  <div class="tag">Digital learning library</div>
+</header>
+
 <main>
-<div class="tag">Learn at your own pace</div>
-<h1>Build your market knowledge.<br><span>One guide at a time.</span></h1>
-<p class="lead">Educational guides for understanding markets, investing concepts and trading methods. These sample products and prices are placeholders for testing.</p>
-<section class="grid">
-<article><div class="tag">Beginner guide</div><h2>Stock Market Basics</h2><p>Introductory concepts and market terminology.</p><div class="price">₹499</div><button onclick="buy('stock-market-basics',this)">Buy test copy</button></article>
-<article><div class="tag">Learning guide</div><h2>Technical Analysis Guide</h2><p>Learn about charts, indicators and price action.</p><div class="price">₹699</div><button onclick="buy('technical-analysis',this)">Buy test copy</button></article>
-<article><div class="tag">Strategy guide</div><h2>Trading Strategies Handbook</h2><p>Educational examples of common trading approaches.</p><div class="price">₹899</div><button onclick="buy('trading-strategies',this)">Buy test copy</button></article>
-</section>
-<p id="status" role="status"></p>
-<p class="note">Demo only: this starter does not store orders, grant PDF downloads, or provide customer accounts. Do not use for live payments. Educational content only; not investment advice.</p>
+  <div class="tag">Learn at your own pace</div>
+  <h1>Build your market knowledge.<br><span>One guide at a time.</span></h1>
+
+  <p class="lead">
+    Educational guides for understanding markets, investing concepts
+    and trading methods.
+  </p>
+
+  <section class="grid">
+    <article>
+      <div class="tag">Beginner guide</div>
+      <h2>Stock Market Basics</h2>
+      <p>Introductory concepts and market terminology.</p>
+      <div class="price">₹499</div>
+      <button class="add-button" onclick="addToCart('stock-market-basics')">Add to Cart</button>
+    </article>
+
+    <article>
+      <div class="tag">Learning guide</div>
+      <h2>Technical Analysis Guide</h2>
+      <p>Learn about charts, indicators and price action.</p>
+      <div class="price">₹699</div>
+      <button class="add-button" onclick="addToCart('technical-analysis')">Add to Cart</button>
+    </article>
+
+    <article>
+      <div class="tag">Strategy guide</div>
+      <h2>Trading Strategies Handbook</h2>
+      <p>Educational examples of common trading approaches.</p>
+      <div class="price">₹899</div>
+      <button class="add-button" onclick="addToCart('trading-strategies')">Add to Cart</button>
+    </article>
+  </section>
+
+  <section class="cart">
+    <h2>My Shopping Cart (<span id="cart-count">0</span>)</h2>
+    <div id="cart-items">Your cart is empty.</div>
+    <div class="total">Total: ₹<span id="cart-total">0</span></div>
+    <button id="checkout-button" class="checkout-button" onclick="checkout()" disabled>
+      Proceed to Payment
+    </button>
+  </section>
+
+  <p id="status" role="status"></p>
+
+  <p class="note">
+    Demo only: payments are in Razorpay test mode. This version does not
+    yet store orders, provide PDF downloads, or create customer accounts.
+    Educational content only; not investment advice.
+  </p>
 </main>
+
 <script>
-async function buy(productId, button){
-  const status=document.getElementById('status');
-  button.disabled=true; status.textContent='Creating test order…';
-  try{
-    const r=await fetch('https://deepakfinance.onrender.com/api/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId})});
-    const data=await r.json(); if(!r.ok) throw new Error(data.error||'Order creation failed');
-    const checkout=new Razorpay({
-      key:data.keyId,amount:data.amount,currency:data.currency,name:'deepakfinance',
-      description:data.productName,order_id:data.orderId,
-      handler:async function(response){
-        const v=await fetch('https://deepakfinance.onrender.com/api/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(response)});
-        const result=await v.json();
-        status.textContent=result.verified?'Test payment verified. No real money was charged.':'Payment verification failed.';
-      },
-      modal:{ondismiss:function(){status.textContent='Checkout closed.';}}
-    });
-    checkout.open(); status.textContent='';
-  }catch(e){status.textContent=e.message;}
-  finally{button.disabled=false;}
+const products = {
+  "stock-market-basics": {
+    name: "Stock Market Basics",
+    price: 499
+  },
+  "technical-analysis": {
+    name: "Technical Analysis Guide",
+    price: 699
+  },
+  "trading-strategies": {
+    name: "Trading Strategies Handbook",
+    price: 899
+  }
+};
+
+let cart = [];
+
+function addToCart(id) {
+  if (cart.includes(id)) {
+    document.getElementById("status").textContent =
+      "This guide is already in your cart.";
+    return;
+  }
+
+  cart.push(id);
+  document.getElementById("status").textContent =
+    products[id].name + " added to your cart.";
+
+  renderCart();
 }
+
+function removeFromCart(id) {
+  cart = cart.filter(item => item !== id);
+  renderCart();
+  document.getElementById("status").textContent =
+    "Item removed from your cart.";
+}
+
+function renderCart() {
+  const items = document.getElementById("cart-items");
+  const count = document.getElementById("cart-count");
+  const totalElement = document.getElementById("cart-total");
+  const checkoutButton = document.getElementById("checkout-button");
+
+  count.textContent = cart.length;
+
+  if (cart.length === 0) {
+    items.textContent = "Your cart is empty.";
+  } else {
+    items.innerHTML = "";
+
+    cart.forEach(id => {
+      const product = products[id];
+      const row = document.createElement("div");
+      row.className = "cart-item";
+
+      const name = document.createElement("span");
+      name.textContent = product.name + " - ₹" + product.price;
+
+      const remove = document.createElement("button");
+      remove.className = "remove-button";
+      remove.textContent = "Remove";
+      remove.onclick = () => removeFromCart(id);
+
+      row.appendChild(name);
+      row.appendChild(remove);
+      items.appendChild(row);
+    });
+  }
+
+  const total = cart.reduce(
+    (sum, id) => sum + products[id].price, 0
+  );
+
+  totalElement.textContent = total;
+  checkoutButton.disabled = cart.length === 0;
+}
+
+async function checkout() {
+  const status = document.getElementById("status");
+  const button = document.getElementById("checkout-button");
+
+  if (cart.length === 0) return;
+
+  button.disabled = true;
+  status.textContent = "Creating your test order...";
+
+  try {
+    const response = await fetch(
+      "https://deepakfinance.onrender.com/api/create-order",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productIds: cart })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Order creation failed.");
+    }
+
+    const payment = new Razorpay({
+      key: data.keyId,
+      amount: data.amount,
+      currency: data.currency,
+      name: "deepakfinance",
+      description: data.productName,
+      order_id: data.orderId,
+
+      handler: async function(paymentResponse) {
+        try {
+          const verifyResponse = await fetch(
+            "https://deepakfinance.onrender.com/api/verify-payment",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(paymentResponse)
+            }
+          );
+
+          const result = await verifyResponse.json();
+
+          if (result.verified) {
+            status.textContent =
+              "Test payment verified successfully. No real money was charged.";
+            cart = [];
+            renderCart();
+          } else {
+            status.textContent = "Payment verification failed.";
+          }
+        } catch (error) {
+          status.textContent = "Could not verify payment. Please contact support.";
+        }
+      },
+
+      modal: {
+        ondismiss: function() {
+          status.textContent = "Checkout closed.";
+        }
+      }
+    });
+
+    payment.open();
+    status.textContent = "";
+
+  } catch (error) {
+    status.textContent = error.message;
+  } finally {
+    button.disabled = cart.length === 0;
+  }
+}
+
+renderCart();
 </script>
-</body></html>
+</body>
+</html>
