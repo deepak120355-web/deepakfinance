@@ -84,7 +84,14 @@ button:disabled { opacity: .5; cursor: wait; }
 <body>
 <header>
   <div class="brand">deepak<span>finance</span></div>
-  <div class="tag">Digital learning library</div>
+
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button onclick="document.getElementById('login-section').scrollIntoView({behavior:'smooth'})"
+      style="width:auto;padding:9px 16px;">Login</button>
+
+    <button onclick="document.getElementById('cart-section').scrollIntoView({behavior:'smooth'})"
+      style="width:auto;padding:9px 16px;">Cart 🛒</button>
+  </div>
 </header>
 <section style="max-width:500px;margin:30px auto;padding:24px;background:#151515;border:1px solid #d7b56d;border-radius:15px;">
   <h2 style="color:#d7b56d;">Customer Login</h2>
